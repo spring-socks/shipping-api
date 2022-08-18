@@ -1,0 +1,33 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: shipping-api
+  description: shipping-api
+  tags:
+  - spring-socks
+  - java
+  - spring
+  - web
+  annotations:
+    'backstage.io/kubernetes-label-selector': 'app.kubernetes.io/part-of=shipping-api'
+spec:
+  type: service
+  lifecycle: experimental
+  owner: spring-socks
+---
+#apiVersion: backstage.io/v1alpha1
+#kind: API
+#metadata:
+#  name: shipping-api
+#  description: shipping-api
+#  tags:
+#  - spring-socks
+#  - java
+#  - spring
+#  - web
+#spec:
+#  type: openapi
+#  lifecycle: experimental
+#  owner: spring-socks
+#  definition:
+#    $text: https://raw.githubusercontent.com/spring-socks/shipping-api/main/src/main/resources/static/openapi/doc.yml

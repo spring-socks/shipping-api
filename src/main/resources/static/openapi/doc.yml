@@ -1,0 +1,14 @@
+servers:
+- description: Local
+  url: 'http://localhost:5003'
+components:
+  schemas: { }
+info:
+  contact: { }
+  description: shipping-api
+  license:
+    name: Apache 2.0
+  title: 'Spring Socks: shipping-api'
+  version: 0.0.1-SNAPSHOT
+openapi: 3.0.1
+paths: { }
