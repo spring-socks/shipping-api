@@ -3,12 +3,17 @@ package lol.maki.socks.shipping.web;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
+import am.ik.yavi.builder.ValidatorBuilder;
+import am.ik.yavi.core.ConstraintViolations;
+import am.ik.yavi.core.Validator;
 import lol.maki.socks.shipping.Carrier;
 import lol.maki.socks.shipping.Shipment;
 import lol.maki.socks.shipping.ShipmentMapper;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.IdGenerator;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -17,6 +22,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
@@ -45,7 +51,14 @@ public class ShippingController {
 	}
 
 	@PostMapping(path = "/shipping")
-	public ResponseEntity<ShipmentResponse> postShipping(@RequestBody ShipmentRequest req, UriComponentsBuilder builder) {
+	public ResponseEntity<?> postShipping(@RequestBody ShipmentRequest req, UriComponentsBuilder builder) {
+		final ConstraintViolations violations = ShipmentRequest.validator.validate(req);
+		if (!violations.isValid()) {
+			final List<Map<String, Object>> details = violations.details().stream().map(d -> Map.of("field", d.getArgs()[0], "message", d.getDefaultMessage())).toList();
+			return ResponseEntity.badRequest().body(Map.of(
+					"error", HttpStatus.BAD_REQUEST.getReasonPhrase(),
+					"details", details));
+		}
 		final Shipment shipment = new Shipment(
 				Carrier.chooseByItemCount(req.itemCount()),
 				req.orderId(),
@@ -57,7 +70,12 @@ public class ShippingController {
 	}
 
 
-	record ShipmentRequest(int itemCount, String orderId) {}
+	record ShipmentRequest(int itemCount, String orderId) {
+		static Validator<ShipmentRequest> validator = ValidatorBuilder.<ShipmentRequest>of()
+				.constraint(ShipmentRequest::itemCount, "itemCount", c -> c.notNull().greaterThanOrEqual(1))
+				.constraint(ShipmentRequest::orderId, "orderId", c -> c.notBlank())
+				.build();
+	}
 
 	record ShipmentResponse(String orderId, String carrier, LocalDate deliveryDate,
 							UUID trackingNumber) {}

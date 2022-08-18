@@ -106,4 +106,20 @@ class ShippingControllerTest {
 				.andExpect(jsonPath("$.orderId").value("3"))
 				.andExpect(jsonPath("$.trackingNumber").value("7e8992a3-8492-482b-9432-f28428db6472"));
 	}
+
+	@Test
+	void postShippingBadRequest() throws Exception {
+		this.mockMvc.perform(post("/shipping")
+						.contentType(APPLICATION_JSON)
+						.characterEncoding(UTF_8.name())
+						.content("{\"orderId\": \"\", \"itemCount\": 0}"))
+				.andExpect(status().isBadRequest())
+				.andExpect(openApi().isValid("static/openapi/doc.yml"))
+				.andExpect(jsonPath("$.error").value("Bad Request"))
+				.andExpect(jsonPath("$.details.length()").value(2))
+				.andExpect(jsonPath("$.details[0].field").value("itemCount"))
+				.andExpect(jsonPath("$.details[0].message").value("\"itemCount\" must be greater than or equal to 1"))
+				.andExpect(jsonPath("$.details[1].field").value("orderId"))
+				.andExpect(jsonPath("$.details[1].message").value("\"orderId\" must not be blank"));
+	}
 }

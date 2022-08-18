@@ -63,6 +63,8 @@ paths:
               schema:
                 type: string
                 format: uri
+        '400':
+          description: Bad Request
       summary: Ship a shipping request
       operationId: post-shipping
       tags:
